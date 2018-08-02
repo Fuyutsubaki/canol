@@ -16,13 +16,24 @@ void Main()
 
 	app::GameView view;
 
-	model->as_click().subscribe([&](int n) {
+	model->onChangedBank().subscribe([&](int n) {
 		view.set_bank(n);
 	});
 
-	view.get_channel().subscribe([&](int) {
+	model->onChangedBuilding().subscribe([&](auto const&t) {
+		auto[n,build] = t;
+		view.set_building(n, build);
+	});
+
+	view.onClick().subscribe([&](auto) {
 		model->click();
 	});
+
+	for (std::size_t i = 0; i < app::BuildingMax; ++i) {
+		view.onClickBuild(i).subscribe([=](auto) {
+			model->buy_building(i);
+		});
+	}
 
 	while (System::Update())
 	{
@@ -30,7 +41,7 @@ void Main()
 		{
 			scheduler.update();
 		}
-		
+		model->tik();  
 		view.update();
 		view.draw();
 	}
