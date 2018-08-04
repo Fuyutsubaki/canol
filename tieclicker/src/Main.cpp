@@ -16,7 +16,7 @@ void Main()
 
 	app::GameView view;
 
-	model->onChangedBank().subscribe([&](int n) {
+	model->onChangedBank().subscribe([&](auto n) {
 		view.set_bank(n);
 	});
 
