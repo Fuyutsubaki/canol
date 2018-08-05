@@ -1,7 +1,7 @@
 ﻿
 # include <Siv3D.hpp> // OpenSiv3D v0.2.7
 #include "app/clicker/app1.hpp"
-
+#include "app/clicker/view.hpp"
 
 void Main()
 {
@@ -14,26 +14,28 @@ void Main()
 
 	auto model = std::make_shared<app::GameModel>(dat);
 
-	app::GameView view;
+	auto view = std::make_shared<app::GameView>();
 
 	model->onChangedBank().subscribe([&](auto n) {
-		view.set_bank(n);
+		view->set_bank(n);
 	});
 
 	model->onChangedBuilding().subscribe([&](auto const&t) {
 		auto[n,build] = t;
-		view.set_building(n, build);
+		view->set_building(n, build);
 	});
 
-	view.onClick().subscribe([&](auto) {
-		model->click();
+	model->onChangedTps().subscribe([&](auto n) {
+		view->set_tps(n);
 	});
 
 	for (std::size_t i = 0; i < app::BuildingMax; ++i) {
-		view.onClickBuild(i).subscribe([=](auto) {
+		view->onClickBuild(i).subscribe([=](auto) {
 			model->buy_building(i);
 		});
 	}
+
+	model->chInit();
 
 	while (System::Update())
 	{
@@ -42,7 +44,7 @@ void Main()
 			scheduler.update();
 		}
 		model->tik();  
-		view.update();
-		view.draw();
+		view->update();
+		view->draw();
 	}
 }
