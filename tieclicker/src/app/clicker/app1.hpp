@@ -5,6 +5,8 @@
 #include<variant>
 #include"rules.hpp"
 #include "coffin/util.hpp"
+//#include "src/coffin/util.hpp"
+//#include <src/coffin/util.hpp>
 
 
 namespace app {
@@ -63,12 +65,11 @@ namespace app {
 			chChangedBank_.on_next(dat_->bank);
 		}
 
-		void tik(){
+		void tik(double sec){
 			auto tps = dat_->calc_tps(); 
 			chChangedTps_.on_next(tps);
-			dat_->bank += tps;
+			dat_->bank += tps * sec;
 			chChangedBank_.on_next(dat_->bank);
-
 		}
 
 		void buy_building(std::size_t N) {
@@ -95,42 +96,7 @@ namespace app {
 		}
 	};
 
-	class BoxObject {
-	public:
-		virtual ~BoxObject(){}
-		BoxObject(s3d::Rect rect)
-			: rect_(rect)
-		{}
 
-		void update() {
-			if (rect_.leftClicked()) {
-				click_.on_next({});
-			}
-			{
-				Transformer2D local{ s3d::Mat3x2::Identity().translated(rect_.tl()),true };
-
-				// update_impl();
-			}
-		}
-
-		cfn::basic_cnannel<std::monostate>& onClick() {
-			return click_;
-		}
-
-		void draw() {
-			rect_.drawFrame();
-			{
-				Transformer2D local{ s3d::Mat3x2::Identity().translated(rect_.tl()) };
-				draw_impl();
-			}
-		}
-
-		virtual void draw_impl() {};
-	private:
-		s3d::Rect rect_;
-		cfn::basic_cnannel<std::monostate> click_;
-
-	};
 
 
 

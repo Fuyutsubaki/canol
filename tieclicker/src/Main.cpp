@@ -36,6 +36,7 @@ void Main()
 	}
 
 	model->chInit();
+	view->init();
 
 	while (System::Update())
 	{
@@ -43,7 +44,7 @@ void Main()
 		{
 			scheduler.update();
 		}
-		model->tik();  
+		model->tik(System::DeltaTime());
 		view->update();
 		view->draw();
 	}
