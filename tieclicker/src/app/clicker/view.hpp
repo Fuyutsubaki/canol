@@ -2,19 +2,7 @@
 #include "app1.hpp"
 
 namespace app {
-	s3d::String tienum_goodviwer(tie_float n) {
-		// ex: 123 → 1.230E+3;
-		if (n>10000) {
-			auto d = (int)std::log10(n);
-			s3d::String tmp = s3d::Format(s3d::DecimalPlace(3), (n / std::pow(10, d - 3)) / 1000.0);
-			return s3d::Format(tmp, s3d::String(5 - tmp.size(), '0'), U"E+", d);
-			// return s3d::Format(s3d::DecimalPlace(3), (n / std::pow(10, d - 3)) / 1000.0, U"E+", d);// 1.000 みたいなとき文字長変わってカクカクする
-		}
-		else {
-			return s3d::Format(s3d::DecimalPlace(1), n);
-		}
-
-	}
+	s3d::String tienum_goodviwer(tie_float n);
 	class BoxObject {
 	public:
 		virtual ~BoxObject() {}
@@ -38,7 +26,6 @@ namespace app {
 		}
 
 		void draw() {
-			rect_.drawFrame();
 			{
 				Transformer2D local{ s3d::Mat3x2::Identity().translated(rect_.tl()),true };
 				draw_impl();
@@ -68,12 +55,11 @@ namespace app {
 		s3d::String name;
 		std::size_t num;
 		tie_float next_price;
-		s3d::Font font{ 50 };
-		s3d::Font font_mini{ 15 };
 
 		void draw_impl() {
-			font(num).draw();
-			font_mini(tienum_goodviwer(next_price)).draw(0, 50);
+			local_rect().drawFrame();
+			s3d::FontAsset(U"f50")(num).draw();
+			s3d::FontAsset(U"f10")(U"必要な知恵:", tienum_goodviwer(next_price)).draw(0, 50);
 		}
 	};
 
@@ -84,16 +70,19 @@ namespace app {
 		Info()
 			:BoxObject({ {0,0},{ 280,100 } })
 		{		}
-		s3d::Texture bg_ = s3d::TextureAsset(U"anos");
-		s3d::String description_ = U"え、VRってパンツ覗くための道具じゃないんですか？";
-		s3d::Font font{ 10 };
+		s3d::String screen_name;
+		s3d::String description_ ;
+		s3d::String textrure;
 		bool visible = 0;
 	private:
 		void draw_impl() override{
 			if (visible) {
-				local_rect().draw(s3d::Palette::Black);
-				s3d::TextureAsset(U"anos").resized(100, 100).draw();
-				font(description_).draw();
+				//s3d::TextureAsset(textrure).resized(100, 100).draw();
+				auto img = s3d::TextureAsset(textrure);
+				img.scaled(100.0 / img.height()).draw();
+				local_rect().draw(s3d::ColorF{ 0,0,0,0.6 });
+				auto rect1 = s3d::FontAsset(U"f15")(screen_name).draw();
+				s3d::FontAsset(U"f10")(description_).draw(rect1.bl());
 			}
 
 		}
@@ -104,27 +93,29 @@ namespace app {
 		GameView() {		}
 
 		void init() {
+			s3d::TextureAsset::Register(U"bg", U"asset/texture/bg.png");
+			s3d::TextureAsset::Register(U"punch", U"asset/texture/punch.png");
+			s3d::TextureAsset::Register(U"water", U"asset/texture/water.png");
+			s3d::TextureAsset::Register(U"light", U"asset/texture/light.png");
 			s3d::TextureAsset::Register(U"anos", U"asset/texture/anos.png");
+			s3d::TextureAsset::Register(U"sushi", U"asset/texture/sushi.png");
+			s3d::TextureAsset::Register(U"hmd", U"asset/texture/hmd.png");
+			s3d::FontAsset::Register(U"f80", 80);
+			s3d::FontAsset::Register(U"f50", 50);
+			s3d::FontAsset::Register(U"f15", 15);
+			s3d::FontAsset::Register(U"f10", 10);
 		}
 
-		void update() {
+		void update();
+		void draw() {
+			s3d::TextureAsset(U"bg").draw();
+			s3d::FontAsset(U"f50")(tienum_goodviwer(val_)).draw();
+			s3d::FontAsset(U"f15")(U"per second:+", tienum_goodviwer(tps_)).draw(0, 100);
 			for (auto &build : builing_list_) {
-				build.update();
+				build.draw();
 			}
-
-			info_->visible = false;
-			for (auto &build : builing_list_) {
-				if (build.rect_.mouseOver()) {
-					info_->visible = true;
-					auto boxh = info_->rect_.h;
-					int y = std::clamp(s3d::Cursor::Pos().y - boxh / 2, 0 , s3d::Window::Height() - boxh);
-					int x = build.rect_.x - info_->rect_.w;
-					info_->rect_.pos = {x,y};
-				}
-			}
-
+			info_->draw();
 		}
-		void draw();
 
 		void set_bank(tie_float val) {
 			val_ = val;
@@ -145,7 +136,6 @@ namespace app {
 	private:
 		tie_float val_;
 		tie_float tps_;
-		s3d::Font font{ 50 };
 
 		std::array<BuildingView, BuildingMax> builing_list_ = {
 			s3d::Point{ 480,0 },

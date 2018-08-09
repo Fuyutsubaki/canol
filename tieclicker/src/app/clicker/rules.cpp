@@ -6,12 +6,12 @@ namespace app{
 		double tps;
 	};
 	std::array<Datset, BuildingMax> conf = {
-		Datset{10.,1},
-		Datset{1000.,2<<26},
-		Datset{ 100000. ,42},
-		Datset{ 10000000. ,10000},
-		Datset{ 1000000000. ,1500000},
-		Datset{ 100000000000. ,1000000000}
+		Datset{0.1,1},
+		Datset{1000.,100},
+		Datset{ 30000 ,5000},
+		Datset{ 800000 ,70000},
+		Datset{ 10000000. ,1500000},
+		Datset{ 1000000000. ,99999000}
 	};
 
 	double base_price(std::size_t n, std::size_t id) {

@@ -5,10 +5,7 @@
 
 void Main()
 {
-	Graphics::SetBackground(ColorF(0.8, 0.9, 1.0));
-
-	const Font font(50);
-
+	s3d::Window::SetTitle(U"知恵クリッカー(仮)");
 	cfn::mainloop_scheduler scheduler;
 	auto dat = std::make_shared<app::Data>();
 
@@ -45,6 +42,9 @@ void Main()
 			scheduler.update();
 		}
 		model->tik(System::DeltaTime());
+		if (s3d::Key8.pressed()) {
+			model->tik(1);
+		}
 		view->update();
 		view->draw();
 	}
